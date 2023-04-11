@@ -1,0 +1,7 @@
+- hosts: all
+  gather_facts: false
+
+  tasks:
+   - name: Pinging a server
+     ansible.builtin.ping:
+       data: pong
