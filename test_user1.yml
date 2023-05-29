@@ -1,0 +1,14 @@
+- hosts: all
+  gather_facts: false
+  
+  tasks:
+
+    - name: Execute script with wasusr
+      shell: sh /appl/was/bin/versionInfo.sh
+      become: true
+      become_user: wasusr
+ 
+    - name: Execute script with ihsusr
+      shell: sh  /appl/ihs/custom/rc.ihs -c status -a
+      become: true
+      become_user: ihsusr
