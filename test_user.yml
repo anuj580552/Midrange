@@ -4,7 +4,7 @@
   tasks:
 
     - name: Execute script with wasusr
-      shell: sh ls -lrt /appl/was
+      shell: ls -lrt /appl/was
       become: true
       become_user: wasusr
  
