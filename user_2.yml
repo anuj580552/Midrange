@@ -1,0 +1,18 @@
+- hosts: all
+  gather_facts: false
+  
+  tasks:
+
+    - name: Execute script with wasusr
+      shell: sh /appl/was/custom/cli status all
+      become: true
+      become_user: wasusr
+      become_method: sudo
+ 
+    - name: Execute script with ihsusr
+      shell: sh  /appl/ihs/custom/rc.ihs -c status -a
+      become: true
+      become_user: ihsusr
+      become_method: sudo
+
+
