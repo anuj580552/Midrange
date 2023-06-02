@@ -1,0 +1,10 @@
+{'currentcertificates':
+        {'default': {'expireOn': 'Sep 5,
+            2039', 'default': 'True', 'fingerprint': 'SHA1 Fingerprint=D1:DE:CB:CF:EA: 23: 82:CD:EB:9E: 14:EB:EE: 38: 63: 15:D9: 40: 17: 96', 
+           'alias': 'default', 'selfsigned': 'True', 'aabca': 'No'
+        }, 'ut aab-keyring server key': {'expireOn': 'Oct 2,
+            2029', 'default': 'False', 'fingerprint': 'SHA1 Fingerprint=61:EA: 13:F8: 85: 94: 10: 37:C5: 81: 69:AF:EC:F0:AF: 84:7E: 96:D0: 5B', 
+           'alias': 'ut aab-keyring server key', 'selfsigned': 'False', 'aabca': 'No'
+        }
+    }, 'returncode': 0
+}

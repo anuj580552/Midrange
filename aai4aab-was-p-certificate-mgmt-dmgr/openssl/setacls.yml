@@ -1,0 +1,19 @@
+---
+
+- name: add extra members/groups to the work directory - default
+  acl:
+    path: "{{ certificateWorkDir }}"
+    default: yes
+    etype: user
+    entity: "{{ in_user }}"
+    permissions: rwX
+    state: present
+
+- name: add extra members/groups to the work directory
+  acl:
+    path: "{{ certificateWorkDir }}"
+    default: no
+    etype: user
+    entity: "{{ in_user }}"
+    permissions: rwX
+    state: present

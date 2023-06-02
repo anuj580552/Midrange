@@ -1,0 +1,33 @@
+---
+#
+- name: activate the new default
+  block:
+    - name: backup current stores
+      block:
+        - copy:
+            src: "{{ keyFilePath }}/{{ FileName }}"
+            dest: "{{ keyFilePath }}/{{ FileNameBCK }}"
+            remote_src: yes
+            mode: preserve
+      become: true
+      become_user: wasusr
+      become_method: sudo
+    - name: activate
+      block:
+        - debug:
+            msg:
+              - "{{ currentDefault }}"
+              - "{{ newDefault }}"
+            verbosity: 1
+        - include_tasks: WAS/wsAdmin.yml
+          vars:
+            wasCommandString: "{{ lookup('template', './WebsphereScripts/templates/activate_new_default.j2.py')  }}"
+
+          register: wsadmin
+  vars:
+#    scopeType: "dmgr"
+    currentDefault: "{{ certificateDetails.processing.existingDefault }}"
+    newDefault: "default-{{ scopeType }}{{ certificateReplacementSuffix }}"
+    FileName: "security.xml"
+    FileNameBCK: "{{ FileName }}.{{ backupPostfix }}"
+    keyFilePath: "/appl/was/profiles/{{ scopeType }}/config/cells/{{ inventory_hostname_short }}-cell"

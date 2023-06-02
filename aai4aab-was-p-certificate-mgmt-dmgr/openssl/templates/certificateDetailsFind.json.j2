@@ -1,0 +1,32 @@
+{%- if inArray is not defined -%}
+{"directory":{
+    "accessible":false,
+    "stg":{},
+    "work":{}
+    },
+    "P12":{
+        "working":{},
+        "Stores":{}
+    }
+}
+{%- else -%}
+{%- if inWorkDirectory is not defined -%}
+  {%- set inWorkDirectory = inArray.directory.work  -%}
+{%- endif -%}
+  
+
+{%- if inSTGDirectory is not defined -%}
+  {%- set inSTGDirectory = inArray.directory.stg -%}
+{%- endif -%}
+
+{%- if  inSTGDirectory.stat is defined and 
+        inSTGDirectory.stat.exists and
+        inSTGDirectory.stat.readable -%}
+
+    {%- set _dummy = inArray.directory.update({ "accessible": true }) -%}
+{%- endif -%}
+
+{%- set _dummy = inArray.directory.update({ "work":inWorkDirectory }) -%}
+{%- set _dummy = inArray.directory.update({ "stg":inSTGDirectory }) -%}
+{{ inArray }}
+{%- endif -%}

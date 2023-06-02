@@ -1,0 +1,14 @@
+- name: get all plugin-cfg files
+  find:
+    path: "/appl/ihs/servers"
+    patterns: "^plugin-cfg.xml$"
+    use_regex: yes
+    recurse: yes
+  register: foundAllPluginConfig
+- name: Fail if return code is not 0
+  ansible.builtin.file:
+    state: touch
+    path: "{{ item.path }}"
+  when: foundAllPluginConfig.matched != 0
+  loop: "{{ foundAllPluginConfig.files }}"
+

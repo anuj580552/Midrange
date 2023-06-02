@@ -1,0 +1,22 @@
+---
+# This task is invoked multiple times. Clear the variable before adding to them
+- name: invoke wsadmin shell script
+  include_tasks: WAS/wsAdmin.yml
+  vars:
+#    scopeType: "dmgr"
+#    aliasSSLSettings: 'CellDefaultSSLSettings'
+    wasCommandString: "{{ lookup('template', './WebsphereScripts/templates/checkandgetcertificates.j2.py')  }}"
+  register: wsadmin
+
+- name: combine the certificate details
+  set_fact:
+    certificateDetails: "{{ lookup('template', './WebsphereScripts/templates/certficatsExtract.json.j2') }}"
+  vars:
+    currentcertificates: "{{ results_wsadmin.output_lines.currentcertificates }}"
+    aliasSSLConfig: "{{ results_wsadmin.output_lines.sslconfig }}"
+- name: Display the result, when the verbosity is set
+  debug:
+    msg:
+      - "Certificates in {{ aliasSSLSettings }} in scope {{ scopeType }}"
+      - "{{ certificateDetails }}"
+    verbosity: 1

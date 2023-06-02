@@ -1,0 +1,72 @@
+---
+- set_fact:
+    certDetails: "{{ lookup('template', './templates/p12storefacts.json.j2') }}"
+  vars: 
+    inArray: "{{ certDetails }}"
+    inP12Store: "{{ P12StoreFile }}"
+- name: check password file exists
+  stat:
+      path: "{{ certDetails.P12.working.storeDetails.password.file }}" # required. The full path of the file/object to get the facts of.
+  register: _P12PasswordFile
+- set_fact:
+    certDetails: "{{ lookup('template', './templates/p12storefacts.json.j2')  }}"
+  vars: 
+    inArray: "{{ certDetails }}"
+    inPasswordFileExists: "{{ _P12PasswordFile.stat.exists }}"
+- name: parsing
+  block:  
+    - name: Read password... need in websphere
+      slurp:
+          src: "{{ certDetails.P12.working.storeDetails.password.file }}"
+      register: _P12CertSecret
+
+    - debug:
+        msg: "{{ _P12CertSecret }}"
+    - set_fact:
+        certDetails: "{{ lookup('template', './templates/p12storefacts.json.j2')  }}"
+      vars: 
+        inArray: "{{ certDetails }}"
+        inCertSecret: "{{ _P12CertSecret.content }}"
+    - debug:
+        msg: 
+          - "{{ certDetails }}"
+
+    - name: pasrse p12 store
+      command: "openssl pkcs12 -in {{ P12StoreFile.path }} -passin file:{{ certDetails.P12.working.storeDetails.password.file }} -nodes -out {{ certificateWorkDir }}/temp.pem"
+      register: returnCode
+    - name: pasrse p12 store
+      command: "openssl x509 -in {{ certificateWorkDir }}/temp.pem -noout -text -certopt no_subject,no_header,no_version,no_serial,no_signame,no_validity,no_issuer,no_pubkey,no_sigdump,no_aux"
+      register: returnCode
+    
+    - name: get modulus
+      command: "openssl x509 -in {{ certificateWorkDir }}/temp.pem -noout -modulus"
+      register: _P12certModulus
+    - set_fact:
+        certDetails: "{{ lookup('template', './templates/p12storefacts.json.j2')  }}"
+      vars: 
+        inArray: "{{ certDetails }}"
+        inModulus: "{{ _P12certModulus.stdout_lines }}"
+
+    - name: get modulus
+      command: "openssl x509 -in {{ certificateWorkDir }}/temp.pem -noout -fingerprint"
+      register: _P12certfingerprint
+    - set_fact:
+        certDetails: "{{ lookup('template', './templates/p12storefacts.json.j2')  }}"
+      vars: 
+        inArray: "{{ certDetails }}"
+        inFingerprint: "{{ _P12certfingerprint.stdout_lines }}"
+    
+    - set_fact:
+        certDetails: "{{ lookup('template', './templates/p12storefacts.json.j2')  }}"
+      vars: 
+        inArray: "{{ certDetails }}"
+        inSANBlock: "{{ returnCode.stdout_lines }}"
+  when: certDetails.P12.working.storeDetails.password.exists
+- set_fact:
+    certDetails: "{{ lookup('template', './templates/p12storefacts.json.j2')  }}"
+  vars: 
+    inArray: "{{ certDetails }}"
+    inClearWorking: true
+
+
+

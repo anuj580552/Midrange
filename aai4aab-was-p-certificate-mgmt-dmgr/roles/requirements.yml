@@ -1,0 +1,14 @@
+---
+- src: git+https://dev.azure.com/cbsp-abnamro/GRD0001078/_git/aai4aab-gen-r-set-variables
+  version: master
+  name: set_variable_role
+
+- src: git+https://dev.azure.com/cbsp-abnamro/GRD0001078/_git/aai4aab-gen-r-check-privilege
+  version: master
+  name: check_privilege_role
+
+#- src: git+https://dev.azure.com/cbsp-abnamro/GRD0001078/_git/aai4aab-gen-r-certificate-mgmt
+#  version: master
+#  name: certificate_mgmt
+ 
+##

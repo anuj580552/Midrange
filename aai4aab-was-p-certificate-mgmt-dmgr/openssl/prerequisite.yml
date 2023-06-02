@@ -1,0 +1,45 @@
+---
+###
+# prerequisite.yml :
+#
+# This play setup directoy when not exists
+# Checks if the p12 keystore already exists.
+#
+# return the p12 stat in the fact
+###
+- name: overall
+  block:
+    - name: create workdir certifcate
+      block:
+        - name: first remove directory when exists
+          include_tasks: post_cleanup.yml        
+        - file:
+            path: "{{ certificateWorkDir }}"
+            state: directory
+            mode: "u=rwx,g=s"
+          register: certDirectory
+        - name: set mask to directory - default
+          acl:
+            path: "{{ certificateWorkDir }}"
+            default: yes
+            etype: mask
+            permissions: rwx
+            state: present
+            recursive: yes
+        #- name: set mask to directory
+        #  acl:
+        #    path: "{{ certificateWorkDir }}"
+        #    default: no
+        #    etype: mask
+        #    permissions: rwx
+        #    state: present
+        #    recursive: yes
+        - name: add extra members/groups to the work directory - default
+          include_tasks: setacls.yml
+          vars:
+            in_user: "{{ item }}"
+          loop:
+            - "wasusr"
+            - "ihsusr"
+            - "mqm"
+

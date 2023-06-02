@@ -1,0 +1,70 @@
+---
+- name: First check the current certificated
+  block:
+    # First check the certificated
+    - name: get the current certs
+      include_tasks: WebsphereScripts/checkcurrentcertificates.yml
+  become: true
+  become_user: wasusr
+  become_method: sudo
+- name: only renew certificate when self sign or about to expire
+  block:
+    - name: generate dir and check for p12 keystore
+      include_tasks: openssl/prerequisite.yml
+    - name: setup extra varaibles
+      set_fact:
+        p12StoreName: "default-{{ scopeType }}"
+    - name: issue certificate
+      include_role:
+        name: aai4aab.aai_azra.certificate_mgmt
+        #name: certificate_mgmt
+        tasks_from: certificate_issue
+        public: true
+      vars:
+        client_id: "{{ clientId }}"
+        client_secret: "{{ clientSecret }}"
+        resource_secret: "{{ resourceSecret }}"
+        block_id: "{{ dmgr_block_id }}"
+        oar_id: "{{ dmgr_oar_id }}"
+        azure_ra_common_name: "{{ inventory_hostname_short }}-{{ scopeType }}.nl.eu.abnamro.com"
+        azure_ra_sans: "{{ inventory_hostname }},{{ inventory_hostname_short }}"
+        azure_ra_p12: "{{ p12StoreName }}"
+    - debug:
+        msg:
+          - "{{ request }}"
+        verbosity: 3
+    - file: 
+        dest: "{{ certificateWorkDir }}/{{ p12StoreName }}.p12"
+        mode: a+rx
+      register: _p12chmod
+    - debug:
+        msg:
+          - "chmod result"
+          - "{{_p12chmod}}"
+
+    - name: a lot have changed.. verify the certificate can be activated
+      block:
+        - name: load P12 keystore to websphere
+          include_tasks: WebsphereScripts/load_p12Store.yml
+          vars:
+            currentCerts: "{{ certificateDetails.all }}"
+            sslConfig: "{{ certificateDetails.sslconfig }}"
+        - name: activate new default certificate
+          include_tasks: WebsphereScripts/activatecertificate.yml
+          vars:
+            sslConfig: "{{ certificateDetails.sslconfig }}"
+         
+        # forcing the plugin has more priority over the accepting of the trust
+        - name: touch plugin-cfg to force reload of the keystore by http server
+          include_tasks: WebsphereScripts/touch_plugin_config_xml.yml
+
+        - name: acceptTrust
+          include_tasks: WebsphereScripts/acceptTrust.yml
+
+      become: true
+      become_user: wasusr
+      become_method: sudo
+     # seems overkill... but only at this point all remaint certificates are known
+  when: >-
+    certificateDetails.processing.CertRenewalNeeded is defined and
+    certificateDetails.processing.CertRenewalNeeded

@@ -1,0 +1,11 @@
+---
+collections:
+# Private collections
+  - name: aai4aab.websphere
+  - name: aai4aab.aai_azra
+    version: 0.0.24-aai382.12
+
+# General collections
+  - name: ansible.posix
+  - name: community.crypto
+   

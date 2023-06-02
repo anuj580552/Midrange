@@ -1,0 +1,23 @@
+variables:
+  - name: "chain_correlation_id"
+    value: "$(CI_SOURCESHA)"
+  - name: "triggered_by_username"
+    value: "andreas.jacobs@nl.abnamro.com"
+  - name: "triggered_by_build"
+    value: "2340040"
+  - name: "triggered_by_project"
+    value: "GRD0001078"
+  - name: "triggered_by_sng"
+    value: "false"
+  - name: "authorized_by_build"
+    value: "2340042"
+  - name: "authorized_by_project"
+    value: "GRD0001078"
+  - name: "targetEnvironment"
+    value: "DevGrp"
+  - name: "deployment_environment"
+    value: "DevGrp"
+  - name: "playbook_name"
+    value: "site"
+  - name: extra_var_demo
+    value: ''

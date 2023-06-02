@@ -1,0 +1,84 @@
+{%- set toDay = (("%Y-%m-%d 00:00:00" | strftime) | to_datetime ) -%} 
+{%- set certificateList = {} -%}
+{%- set websphereDefaultList = {} -%}
+{%- set caSignedDefaultList = {} -%}
+{%- set caSignedDefaultListWO = {} -%}
+{%- set reportList = {} -%}
+{%- set processing = {"existingDefault": none,
+                      "replacementDefault": none,
+                      "CertRenewalNeeded": false,
+                      "needActivating": false } -%}
+{%- set ns = namespace( validityDaysExpires = false ) -%} 
+{%- for certKey in  currentcertificates -%} {# loop through all listed certifcates#}
+  {%- set certificate = currentcertificates [certKey] -%}
+  {# Calculate the missing validityDays#}
+  {%- set expireOn = (certificate.expireOn | to_datetime("%b %d, %Y" )) -%}
+  {%- set validityDays = ( expireOn - toDay ).days -%}
+  {%- set _dummy = certificate.update({ "validityDays":validityDays } )  -%}
+  {%- set validityExpires = false -%}  
+  {%- if ( validityDays <= certMinDaysValid ) -%}
+    {%- set validityExpires = true -%}
+    {%- set ns.validityDaysExpires = true -%} 
+  {%- endif -%}  
+  {%- set _dummy = certificate.update({ "validityExpires": validityExpires } )  -%}
+  {%- set _dummy = certificateList.update({ certKey:certificate} ) -%} 
+  {# Add the certificate to one of the special tmp list when default#}
+  {%- if certificate.default == "True" -%}
+    {%- if certificate.selfsigned == "True" -%}
+      {%- set _dummy = websphereDefaultList.update({ certKey:certificate} ) -%} 
+    {%- else -%}
+      {%- set _dummy = caSignedDefaultList.update({ certKey:certificate} ) -%} 
+    {%- endif -%}
+  {%- endif -%}
+  {# last minute assignment to get all the ground work #}
+  {%- set reportItem = { "validityDays":validityDays, 
+  "issuedTo": certificate.certificate.issuedTo, 
+  "issuedBy": certificate.certificate.issuedBy,
+  "validityExpires": certificate.validityExpires } -%}
+  {%- set _dummy = reportList.update({ certKey:reportItem } ) -%} 
+{%- endfor -%}
+{# First try to get the self signed certificate... aka Websphere defaults#}
+{%- set _dummy = processing.update({"existingDefault": aliasSSLConfig['default'] })-%}
+{# When not present... Good there is a more sophisticated default certifecate availbe #}
+{# Okay.. create a new list based on the caSignedDefaults, 
+   but without the existingDefault
+   
+   check whether a new certificate is already loaded.. Whiches is not the 
+   already current default 
+#}
+{%- if processing.existingDefault is not none
+      and caSignedDefaultList | length>0 -%}
+  {%- for certKey in caSignedDefaultList -%} 
+    {%- if certKey not in processing.existingDefault -%}
+     {%- set certificate = caSignedDefaultList [certKey] -%}
+     {%- set _dummy = caSignedDefaultListWO.update({ certKey:certificate} ) -%} 
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+{%- if caSignedDefaultListWO | length>0 -%}
+  {%- for default in caSignedDefaultList-%}
+     {%- if processing.replacementDefault is none or 
+           ( caSignedDefaultList[processing.replacementDefault].validityDays <
+             caSignedDefaultList[default].validityDays ) -%}
+          {%- set _dummy=processing.update({"replacementDefault": default })-%}
+     {%- endif-%}
+  {%- endfor -%}
+{%- endif-%}
+{%- if ( forceRenewal is not none and forceRenewal ) 
+      or ( processing.replacementDefault is none and  (websphereDefaultList | length>0 ))
+      or ( ( caSignedDefaultList | length>0 ) and ns.validityDaysExpires )  -%}
+  {%- set _dummy=processing.update({"CertRenewalNeeded":true })-%}
+{%- endif -%}
+{%- if not (processing.replacementDefault is none
+          or processing.existingDefault is none ) -%} 
+    {%- set _dummy=processing.update({"needActivating": true }) -%}
+{%- endif -%}
+{#  Now it"s time to choose... To create a CSR or Not to create a CSR......
+    When there is still a self signed certificate... and there is no
+    replacement available....  Create a CSR.....
+#}
+{"all":{{ certificateList }},
+    "print": {{ reportList }} ,
+    "processing": {{ processing }} ,
+    "sslconfig": {{ aliasSSLConfig }}
+}

@@ -1,0 +1,2 @@
+email: "{{ azure_ra_email | default(default_azure_ra.email) }}"
+azure_ra_tokendata: "{{ token_data }}"

@@ -1,0 +1,47 @@
+---
+# search for the fingerprint... When P12StoreLoaded is not defined... then
+# the P12 store is not loaded
+
+- name: Load the store into the key store when not yet done
+  block:
+    - debug:
+        msg: "Start loading the Store"
+        verbosity: 1
+    - name: backup current stores
+      block:
+        - copy:
+           src: "{{ keyFilePath }}/{{ keyFileName }}"
+           dest: "{{ keyFilePath }}/{{ keyStoreBCK }}"
+           remote_src: yes
+           mode: preserve
+        - copy:
+           src: "{{ keyFilePath }}/{{ trustFileName }}"
+           dest: "{{ keyFilePath }}/{{ trustStoreBCK }}"
+           remote_src: yes
+           mode: preserve
+    - name: make the new store accessabe by the wasusr
+      file: 
+        dest: "{{ certificateWorkDir }}/{{ p12StoreName }}.p12"
+        mode: a+rx
+      register: _p12chmod
+    - debug:
+        msg:
+          - "chmod result"
+          - "{{_p12chmod}}"
+
+    - include_tasks: WAS/wsAdmin.yml
+      vars:
+        trustAlias: "root-ca-{{ certificateReplacementSuffix }}"
+        p12StorePath: "{{ certificateWorkDir }}/{{ p12StoreName }}.p12"
+        p12StorePasswd: "{{ storeSecret }}"
+        certificateAlias: "{{ aliasName }}"
+        wasCommandString: "{{ lookup('template', './WebsphereScripts/templates/load_p12.j2.py')  }}"
+      register: wsadmin
+    # process the results
+  vars:
+    aliasName: "default-{{ scopeType }}{{ certificateReplacementSuffix }}"
+    keyFileName: "key.p12"
+    keyStoreBCK: "{{ keyFileName }}.{{ backupPostfix }}"
+    trustFileName: "trust.p12"
+    trustStoreBCK: "{{ trustFileName }}.{{ backupPostfix }}"
+    keyFilePath: "/appl/was/profiles/{{ scopeType }}/config/cells/{{ inventory_hostname_short }}-cell"
