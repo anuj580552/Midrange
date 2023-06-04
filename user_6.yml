@@ -4,9 +4,9 @@
   tasks:
 
     - name: clone git to local
-        git:
-          repo: https://github.com/anuj580552/infra-midrange-was/dev/fetchJavaVersion.sh
-          dest: /tmp/
+      git:
+        repo: https://github.com/anuj580552/infra-midrange-was/dev/fetchJavaVersion.sh
+        dest: /tmp/
        
            
     - name: Execute script on destination server
