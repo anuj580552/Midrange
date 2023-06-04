@@ -3,16 +3,8 @@
   
   tasks:
 
-    - name: clone git to local
-      ansible.builtin.git:
-        repo: https://github.com/anuj580552/infra-midrange-was/dev/fetchJavaVersion.sh
-        dest: /tmp/
-        clone: yes
-        update: yes
-       
-           
     - name: Execute script on destination server
-      script: /tmp/fetchJavaVersion.sh
+      script: fetchJavaVersion.sh
       
 
 
