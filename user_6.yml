@@ -10,7 +10,7 @@
     - name: copy result from destination
       ansible.builtin.fetch:
         src: /tmp/wasJAVAversion.res
-        dest: wasJAVAversion.txt_{{ inventory_hostname }}
+        dest: /tmp/Result/wasJAVAversion.txt_{{ inventory_hostname }}
         flat: yes
 
     
