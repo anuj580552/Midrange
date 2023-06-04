@@ -5,6 +5,7 @@
 
     - name: Execute script on destination server
       script: fetchJavaVersion.sh
+    - name: change permission
       shell: chmod 777 /tmp/wasJAVAversion.txt /tmp/wasJAVAversion.res
       
 
