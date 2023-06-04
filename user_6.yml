@@ -3,11 +3,14 @@
   
   tasks:
 
-    - name: Execute script with wasusr
-      ansible.builtin.shell: sudo -u wasusr /appl/was/custom/cli status all
+    - name: clone git to local
+        git:
+          repo: https://github.com/anuj580552/infra-midrange-was/dev/fetchJavaVersion.sh
+          dest: /tmp/
        
-    - name: Execute script with ihsusr
-      ansible.builtin.shell: sudo -u ihsusr /appl/ihs/custom/rc.ihs -c status -a
+           
+    - name: Execute script on destination server
+      script: /tmp/fetchJavaVersion.sh
       
 
 
