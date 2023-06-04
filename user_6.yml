@@ -7,6 +7,13 @@
       script: fetchJavaVersion.sh
     - name: change permission
       shell: chmod 777 /tmp/wasJAVAversion.txt /tmp/wasJAVAversion.res
+    - name: copy result from destination
+      ansible.builtin.fetch:
+        src: /tmp/wasJAVAversion.res
+        dest: wasJAVAversion.txt_{{ inventory_hostname }}
+        flat: yes
+
+    
       
 
 
