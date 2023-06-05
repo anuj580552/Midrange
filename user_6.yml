@@ -4,11 +4,14 @@
   tasks:
 
     - name: Execute script on destination server
-      script: fetchJavaVersion.sh
-    - name: change permission
-      shell: chmod 777 /tmp/wasJAVAversion.txt /tmp/wasJAVAversion.res
-    - name: copy result from destination
-      command: cat /tmp/wasJAVAversion.res > /tmp/Result/wasJAVAversion.txt_{{ inventory_hostname }}
+      script: test.py
+      become: true
+      become_user: wasusr
+      become_method: sudo
+   # - name: change permission
+   #   shell: chmod 777 /tmp/wasJAVAversion.txt /tmp/wasJAVAversion.res
+   # - name: copy result from destination
+   #   command: cat /tmp/wasJAVAversion.res > /tmp/Result/wasJAVAversion.txt_{{ inventory_hostname }}
 
     
       
