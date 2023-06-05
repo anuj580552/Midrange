@@ -4,7 +4,7 @@
   tasks:
 
     - name: Execute script on destination server
-      script: test.py
+      command: test.py
    #   become: true
    #   become_user: wasusr
    #   become_method: sudo
