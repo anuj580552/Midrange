@@ -5,9 +5,9 @@
 
     - name: Execute script on destination server
       script: test.py
-      become: true
-      become_user: wasusr
-      become_method: sudo
+   #   become: true
+   #   become_user: wasusr
+   #   become_method: sudo
    # - name: change permission
    #   shell: chmod 777 /tmp/wasJAVAversion.txt /tmp/wasJAVAversion.res
    # - name: copy result from destination
