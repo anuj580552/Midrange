@@ -3,9 +3,17 @@
   
   tasks:
 
-    - name: Execute script on destination server
-      script: test.py
-   #   become: true
+    - name: Copy script on destination server
+      copy: 
+        src: test.py
+        dest: /tmp/
+        
+    - name: execute script
+      command: python /tmp/test.py
+        
+        
+        
+        #   become: true
    #   become_user: wasusr
    #   become_method: sudo
    # - name: change permission
