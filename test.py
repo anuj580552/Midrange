@@ -1,1 +1,1 @@
-print("Hello WAS Team", "Kya haal hain?")
+print("Hello WAS Team")
